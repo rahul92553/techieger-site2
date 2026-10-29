@@ -1,0 +1,40 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Techieger Admin</title>
+<style>:root{--red:#ff3131;--ink:#111;--mut:#666;--line:#f0dede;--soft:#fff5f5}*{box-sizing:border-box}body{margin:0;font-family:system-ui,Segoe UI,Arial,sans-serif;background:var(--soft);color:var(--ink)}
+.top{background:#fff;border-bottom:1px solid var(--line);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;z-index:5}.top img{height:40px}
+.btn{background:var(--red);color:#fff;border:0;border-radius:30px;padding:9px 18px;font-weight:700;cursor:pointer;font:inherit;font-weight:700}.btn.o{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.wrap{max-width:1100px;margin:auto;padding:20px}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.st{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px}.st b{display:block;font-size:30px;color:var(--red)}.st span{color:var(--mut);font-size:14px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}input,select,textarea{padding:10px 12px;border:1px solid var(--line);border-radius:12px;font:inherit;background:#fff}.bar input{flex:1;min-width:200px}
+.c{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px;animation:in .3s}@keyframes in{from{opacity:0;transform:translateY(8px)}}
+.c h3{margin:0 0 4px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}.meta{color:var(--mut);font-size:13px}.row{display:flex;gap:16px;flex-wrap:wrap;margin:8px 0;font-size:14px}.row a{color:var(--red);font-weight:600}
+.msg{background:var(--soft);border-radius:12px;padding:10px;font-size:14px;white-space:pre-wrap;margin:8px 0}.act{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.act input{flex:1;min-width:160px}
+.badge{font-size:12px;padding:3px 10px;border-radius:20px;font-weight:700;background:#ff31311a;color:var(--red)}.badge.contacted{background:#fff3cd;color:#8a6d00}.badge.closed{background:#d9f5e1;color:#1a7a3a}
+#login{max-width:340px;margin:12vh auto;background:#fff;border:1px solid var(--line);border-radius:20px;padding:28px;text-align:center}#login input{width:100%;margin:14px 0}.err{color:var(--red);font-size:14px;min-height:20px}.empty{text-align:center;color:var(--mut);padding:40px}</style></head><body>
+<div id="login"><img src="logo.png" alt="Techieger" height="60"><h2>Admin sign in</h2><input id="pw" type="password" placeholder="Admin password" autocomplete="current-password"><button class="btn" id="go" style="width:100%">Sign in</button><p class="err" id="err"></p></div>
+<div id="app" hidden><div class="top"><img src="logo.png" alt="Techieger"><div><a class="btn o" href="/api/admin/export.csv" style="text-decoration:none;display:inline-block">Export CSV</a> <button class="btn" id="out">Sign out</button></div></div>
+<div class="wrap"><div class="stats" id="stats"></div><div class="bar"><input id="q" placeholder="Search name, phone, email, message…"><select id="fs"><option value="">All status</option><option value="new">New</option><option value="contacted">Contacted</option><option value="closed">Closed</option></select></div><div id="list"></div></div></div>
+<script>
+var D=[],$=function(i){return document.getElementById(i)};
+function api(u,o){return fetch(u,Object.assign({headers:{'Content-Type':'application/json'}},o)).then(function(r){if(r.status===401&&u.indexOf('login')<0){show(false);throw 0}return r.json()})}
+function show(a){$('login').hidden=a;$('app').hidden=!a}
+function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+function load(){api('/api/admin/inquiries').then(function(d){D=d;show(true);draw()}).catch(function(){})}
+function draw(){var q=$('q').value.toLowerCase(),s=$('fs').value,c={new:0,contacted:0,closed:0};D.forEach(function(r){c[r.status]++});
+ var st=$('stats');st.textContent='';[['Total customers',D.length],['New',c.new],['Contacted',c.contacted],['Closed',c.closed]].forEach(function(a){var d=el('div','st');d.append(el('b',0,a[1]),el('span',0,a[0]));st.append(d)});
+ var L=$('list');L.textContent='';var f=D.filter(function(r){return(!s||r.status===s)&&(!q||[r.name,r.phone,r.email,r.message,r.need].join(' ').toLowerCase().indexOf(q)>-1)});
+ if(!f.length)L.append(el('div','empty','No enquiries yet.'));
+ f.forEach(function(r){var d=el('div','c'),h=el('h3');h.append(el('span',0,r.name),el('span','badge '+r.status,r.status));d.append(h,el('div','meta',new Date(r.created).toLocaleString()));
+  var row=el('div','row'),a=el('a',0,'📞 '+r.phone);a.href='tel:'+r.phone.replace(/[^\d+]/g,'');row.append(a);
+  if(r.email){var m=el('a',0,'✉ '+r.email);m.href='mailto:'+r.email;row.append(m)}
+  row.append(el('span',0,'Need: '+r.need),el('span',0,'Budget: '+r.budget));d.append(row);
+  if(r.message)d.append(el('div','msg',r.message));
+  var ac=el('div','act'),sel=el('select');['new','contacted','closed'].forEach(function(v){var o=el('option',0,v);o.value=v;if(v===r.status)o.selected=true;sel.append(o)});
+  var n=el('input');n.placeholder='Private note…';n.value=r.note||'';
+  var sv=el('button','btn','Save');sv.onclick=function(){api('/api/admin/inquiries/'+r.id,{method:'PATCH',body:JSON.stringify({status:sel.value,note:n.value})}).then(function(x){Object.assign(r,x);draw()})};
+  var dl=el('button','btn o','Delete');dl.onclick=function(){if(confirm('Delete this enquiry permanently?'))api('/api/admin/inquiries/'+r.id,{method:'DELETE'}).then(function(){D=D.filter(function(z){return z!==r});draw()})};
+  ac.append(sel,n,sv,dl);d.append(ac);L.append(d)})}
+$('go').onclick=function(){api('/api/admin/login',{method:'POST',body:JSON.stringify({password:$('pw').value})}).then(function(r){if(r.ok){$('pw').value='';load()}else $('err').textContent=r.error||'Error'})};
+$('pw').onkeydown=function(e){if(e.key==='Enter')$('go').click()};
+$('out').onclick=function(){api('/api/admin/logout',{method:'POST'}).then(function(){show(false)})};
+$('q').oninput=$('fs').onchange=draw;load();setInterval(function(){if(!$('app').hidden&&document.activeElement.tagName!=='INPUT'&&document.activeElement.tagName!=='SELECT')load()},30000);
+</script></body></html>
