@@ -2,4 +2,4 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home1/stech3d9/public_html/
-    - /bin/cp -R * $DEPLOYPATH
+    - /bin/cp index.html Techieger.html admin.html logo.png $DEPLOYPATH
