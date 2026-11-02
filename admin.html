@@ -11,11 +11,11 @@
 .badge{font-size:12px;padding:3px 10px;border-radius:20px;font-weight:700;background:#ff31311a;color:var(--red)}.badge.contacted{background:#fff3cd;color:#8a6d00}.badge.closed{background:#d9f5e1;color:#1a7a3a}
 #login{max-width:340px;margin:12vh auto;background:#fff;border:1px solid var(--line);border-radius:20px;padding:28px;text-align:center}#login input{width:100%;margin:14px 0}.err{color:var(--red);font-size:14px;min-height:20px}.empty{text-align:center;color:var(--mut);padding:40px}</style></head><body>
 <div id="login"><img src="logo.png" alt="Techieger" height="60"><h2>Admin sign in</h2><input id="pw" type="password" placeholder="Admin password" autocomplete="current-password"><button class="btn" id="go" style="width:100%">Sign in</button><p class="err" id="err"></p></div>
-<div id="app" hidden><div class="top"><img src="logo.png" alt="Techieger"><div><a class="btn o" href="/api/admin/export.csv" style="text-decoration:none;display:inline-block">Export CSV</a> <button class="btn" id="out">Sign out</button></div></div>
+<div id="app" hidden><div class="top"><img src="logo.png" alt="Techieger"><div><a class="btn o" href="https://api.techieger.com/api/admin/export.csv" style="text-decoration:none;display:inline-block">Export CSV</a> <button class="btn" id="out">Sign out</button></div></div>
 <div class="wrap"><div class="stats" id="stats"></div><div class="bar"><input id="q" placeholder="Search name, phone, email, message…"><select id="fs"><option value="">All status</option><option value="new">New</option><option value="contacted">Contacted</option><option value="closed">Closed</option></select></div><div id="list"></div></div></div>
 <script>
 var D=[],$=function(i){return document.getElementById(i)};
-function api(u,o){return fetch(u,Object.assign({headers:{'Content-Type':'application/json'}},o)).then(function(r){if(r.status===401&&u.indexOf('login')<0){show(false);throw 0}return r.json()})}
+function api(u,o){return fetch('https://api.techieger.com'+u,Object.assign({credentials:'include',headers:{'Content-Type':'application/json'}},o)).then(function(r){if(r.status===401&&u.indexOf('login')<0){show(false);throw 0}return r.json()})}
 function show(a){$('login').hidden=a;$('app').hidden=!a}
 function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
 function load(){api('/api/admin/inquiries').then(function(d){D=d;show(true);draw()}).catch(function(){})}
