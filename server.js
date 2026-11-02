@@ -23,9 +23,20 @@ const body=req=>new Promise(r=>{let b='';req.on('data',d=>{b+=d;if(b.length>2000
 const clip=(v,n)=>String(v||'').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g,'').trim().slice(0,n);
 const types={'.html':'text/html; charset=utf-8','.png':'image/png','.css':'text/css','.js':'text/javascript','.ico':'image/x-icon','.svg':'image/svg+xml'};
 const csv=v=>'"'+String(v==null?'':v).replace(/"/g,'""').replace(/^([=+\-@])/,"'$1")+'"';
+const ALLOWED=['https://techieger.com','https://www.techieger.com'];
 const server=http.createServer(async(req,res)=>{
  const u=new URL(req.url,'http://x'),p=u.pathname;
  res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Referrer-Policy','same-origin');
+  const origin=req.headers.origin;
+ if(origin&&ALLOWED.includes(origin)){
+  res.setHeader('Access-Control-Allow-Origin',origin);
+  res.setHeader('Access-Control-Allow-Credentials','true');
+  res.setHeader('Vary','Origin');
+ }
+ if(req.method==='OPTIONS'){
+  res.writeHead(204,{'Access-Control-Allow-Methods':'GET,POST,PATCH,DELETE,OPTIONS','Access-Control-Allow-Headers':'Content-Type','Access-Control-Max-Age':'86400'});
+  return res.end();
+ }
  try{
  if(p==='/api/inquiries'&&req.method==='POST'){
   if(limited('q'+ip(req),5,600000))return json(res,429,{error:'Too many requests. Please try again later.'});
