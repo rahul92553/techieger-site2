@@ -1,5 +1,9 @@
 ---
 deployment:
   tasks:
+    - export APPPATH=/home1/stech3d9/techieger-app
     - export DEPLOYPATH=/home1/stech3d9/public_html/
+    - /bin/mkdir -p $APPPATH/tmp
+    - /bin/cp server.js package.json index.html admin.html logo.png $APPPATH/
     - /bin/cp index.html Techieger.html admin.html logo.png $DEPLOYPATH
+    - /bin/touch $APPPATH/tmp/restart.txt
